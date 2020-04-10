@@ -1,0 +1,128 @@
+# 操作逻辑
+
+## 用户
+
+- 注册（提供登陆用户名（不可修改）、昵称（可修改默认同用户名）、密码、联系方式（邮箱、手机号、社交工具（不提供验证））
+- 登陆
+- 修改信息（头像、签名）
+- 查看记录（注册日期、历史发布、历时购买、历史总交易量）
+- 隐藏、删除历史记录
+- 封禁状态
+- **关注**用户
+- 通知(评论回复、产品评论）
+
+### 发布者
+
+- 发布名称
+- 发布详情（可选）
+- 发布物品图片（可选）
+- 修改发布信息
+- 期望价格（可选）
+- 接受购买
+- 取消订购
+- 确认交易结束（发布方）
+- 接受私聊
+
+### 购买者
+
+- 浏览社区（发布名称、发布详情简略、发布图片、发布人昵称、发布人头像）
+- 查看发布详情（名称、详情、发布人、**评论**）
+- 请求购买
+- 取消订购
+- 确认交易结束（购买方）
+- 发起私聊
+
+## 管理员
+
+- 通过发布
+- 拒绝发布
+- 封禁用户
+- 浏览社区
+- 发起私聊
+- 发布**公告**
+
+## 发布
+
+- 名称
+- 图片
+- 详情
+- 发布人
+- 购买人(可匿名)
+- 评论
+- 是否已审核
+- 历史修改记录
+
+# 系统逻辑
+
+## 数据库
+
+**t_user**
+
+- user_id(primary key)
+- username(unique)
+- nickname
+- password
+- avatar_url
+- ban_until
+- join_time
+- admin
+
+**t_notification**
+
+- user_id(foreign key to t_user.user_id)
+- readed
+- notification_time
+- notification_type(translation_finished, comment_to_me, comment_to_product)
+- notification_dest(product_id, comment_id)
+
+**t_social**
+
+- user_id(foreign key to t_user)
+- social_method
+- social_url
+
+**t_bulletin_board**
+
+- publish_time
+- user_id(foreign key to t_user.user_id)
+- content
+
+**t_product**   
+
+- owner(foreign key to t_user.user_id)
+- buyer(foreign key to t_user.user_id)
+- product_id(primary key)
+- product_status(censoring, selling, ordered, confirmed_seller, confirmed_buyer, withdrawn)
+- product_name
+- product_details
+- publish_time
+- expected_price(nullable)
+- clinsh_time
+- visualable_to_other
+- deleted
+
+**t_product_pics**
+
+- product_id(foreign key to t_product)
+- pic_url
+
+**t_comments**
+
+- comment_id
+- comment_time
+- reply_to(foreign key to t_comments.comment_id, nullable)
+- product_id(foreign key to t_product.product_id)
+- user_id(foreign key to t_user.user_id)
+
+
+**t_chat**
+
+- chat_id
+- chat_user_1
+- chat_user_2
+
+**t_chat_msg**
+
+- chat_msg_id
+- user_id
+- chat_msg_content
