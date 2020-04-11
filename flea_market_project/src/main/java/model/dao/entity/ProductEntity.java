@@ -20,8 +20,8 @@ public class ProductEntity {
     UserEntity buyer;
 
     @ManyToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "c_owner_id", nullable = false)
-    UserEntity owner;
+    @JoinColumn(name = "c_seller_id", nullable = false)
+    UserEntity seller;
 
     // censoring, selling, ordered, confirmed_seller, confirmed_buyer, withdrawn
     @Column(name = "c_product_status", nullable = false)

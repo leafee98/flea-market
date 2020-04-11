@@ -25,9 +25,6 @@ public class NotificationEntity {
     @Column(name = "c_notification_time", nullable = false)
     Date notificationTime;
 
-    @Column(name = "c_notification_type")
-    String notificationType;
-
-    @Column(name = "c_notification_dest")
-    String notificationDest;
+    @Column(name = "c_notification_content")
+    String notificationContent;
 }
