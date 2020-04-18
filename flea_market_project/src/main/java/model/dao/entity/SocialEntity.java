@@ -18,8 +18,8 @@ public class SocialEntity {
     Long socialId;
 
     @Column(name = "c_social_type", nullable = false)
-    String social_type;
+    String socialType;
 
     @Column(name = "c_social_url", nullable = false)
-    String social_url;
+    String socialUrl;
 }

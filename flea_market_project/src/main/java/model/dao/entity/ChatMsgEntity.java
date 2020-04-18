@@ -24,4 +24,7 @@ public class ChatMsgEntity {
 
     @Column(name = "c_chat_msg_time", nullable = false)
     Date messageTime;
+
+    @Column(name = "c_chat_msg_content", nullable = false)
+    String content;
 }

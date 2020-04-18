@@ -15,7 +15,7 @@ public class ProductCommentEntity {
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "c_reply_to", nullable = true)
-    ProductCommentEntity comment;
+    ProductCommentEntity replyTo;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "c_product_id", nullable = false)

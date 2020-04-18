@@ -3,19 +3,22 @@ package model.bean;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class UserSelf {
 
-    private String username;
+    String username;
 
-    private String nickname;
+    String nickname;
 
-    private Boolean admin;
+    String avatar_url;
 
-    private String avatar_url;
+    Date banUntil;
 
-    private Date banUntil;
+    Date joinTime;
 
-    private Date joinTime;
+    Boolean admin;
+
+    List<Social> socialList;
 }

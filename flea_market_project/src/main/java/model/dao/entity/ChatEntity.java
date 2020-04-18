@@ -3,7 +3,7 @@ package model.dao.entity;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -15,5 +15,5 @@ public class ChatEntity {
     Long chatId;
 
     @ManyToMany(mappedBy = "chatList")
-    List<UserEntity> userList;
+    Set<UserEntity> userList;
 }

@@ -31,13 +31,16 @@ public class ProductEntity {
     Double expectedPrice;
 
     @Column(name = "c_publish_time", nullable = false)
-    Date publishTime;
+    Date releaseTime;
+
+    @Column(name = "c_product_name", nullable = false)
+    String productName;
 
     @Lob
     @Column(name = "c_product_detail", nullable = false)
     String productDetail;
 
-    @Column(name = "c_clinch_time", nullable = true)
+    @Column(name = "c_clinch_time")
     Date clinchTime;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)

@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -56,7 +57,7 @@ public class UserEntity {
     @JoinTable(name = "t_relation_user_chat",
     joinColumns = @JoinColumn(name = "c_user_id"),
     inverseJoinColumns = @JoinColumn(name = "c_chat_id"))
-    List<ChatEntity> chatList;
+    Set<ChatEntity> chatList;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     List<TokenEntity> tokenList;
