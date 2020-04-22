@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import service.AdminService;
+import service.ProductService;
 import service.SystemService;
 
 import java.util.*;
@@ -37,14 +38,14 @@ public class AdminServiceImpl implements AdminService {
     private UserEntity validateAdmin(String token) {
         UserEntity user = systemService.token2User(token);
         if (user == null) {
-            log.warn("invalided token {}", token);
+            log.warn("invalided token '{}'", token);
             return null;
         } else {
             if (user.getAdmin()) {
-                log.info("user {} admin validate pass", user.getUsername());
+                log.info("user '{}' admin validate pass", user.getUsername());
                 return user;
             } else {
-                log.warn("user {} not admin", user.getUsername());
+                log.warn("user '{}' not admin", user.getUsername());
                 return null;
             }
         }
@@ -60,16 +61,16 @@ public class AdminServiceImpl implements AdminService {
         } else {
             UserEntity user = systemService.findUserByUsername(username);
             if (user == null) {
-                log.warn("no such user: {}", username);
+                log.warn("no such user: '{}'", username);
                 return false;
             } else {
                 if (user.getAdmin()) {
-                    log.warn("user {} is admin already", username);
+                    log.warn("user '{}' is admin already", username);
                     return false;
                 } else {
                     user.setAdmin(true);
                     userRepo.save(user);
-                    log.info("user {} grant admin to user {}", admin.getUsername(), username);
+                    log.info("user '{}' grant admin to user '{}'", admin.getUsername(), username);
                     return true;
                 }
             }
@@ -85,7 +86,7 @@ public class AdminServiceImpl implements AdminService {
         } else {
             UserEntity user = systemService.findUserByUsername(username);
             if (user == null) {
-                log.warn("no such user {}", username);
+                log.warn("no such user '{}'", username);
                 return false;
             } else {
                 Calendar calendar = Calendar.getInstance();
@@ -95,7 +96,7 @@ public class AdminServiceImpl implements AdminService {
                 user.setBanUntil(calendar.getTime());
                 userRepo.save(user);
 
-                log.info("admin {} banned user {} for {} days.", admin.getUsername(), username, day);
+                log.info("admin '{}' banned user '{}' for '{}' days.", admin.getUsername(), username, day);
                 return true;
             }
         }
@@ -110,18 +111,18 @@ public class AdminServiceImpl implements AdminService {
             return null;
         } else {
             List<ProductEntity> productEntityList =
-                    productRepo.findByProductStatusEquals(productRepo.PRODUCT_CENSORING, productRepo.sortByReleaseDesc);
+                    productRepo.findByProductStatusEquals(ProductService.PRODUCT_CENSORING, productRepo.sortByReleaseDesc);
             List<ProductSummary> productSummaryList = new ArrayList<>(productEntityList.size());
-            for (int i = 0; i < productEntityList.size(); ++i) {
-                productSummaryList.set(i, new ProductSummary(productEntityList.get(i)));
+            for (ProductEntity productEntity : productEntityList) {
+                productSummaryList.add(new ProductSummary(productEntity));
             }
-            log.info("admin {} get {} censoring products", admin.getUsername(), productSummaryList.size());
+            log.info("admin '{}' get '{}' censoring products", admin.getUsername(), productSummaryList.size());
             return productSummaryList;
         }
     }
 
     @Override
-    public Boolean CensorProduct(String token, Long productId, Boolean pass) {
+    public Boolean censorProduct(String token, Long productId, Boolean pass) {
         UserEntity admin = validateAdmin(token);
         if (admin == null) {
             log.warn("censor failed, invalid token or user is not admin");
@@ -131,15 +132,15 @@ public class AdminServiceImpl implements AdminService {
             if (productOpt.isPresent()) {
                 ProductEntity product = productOpt.get();
                 if (pass) {
-                    product.setProductStatus(productRepo.PRODUCT_SELLING);
+                    product.setProductStatus(ProductService.PRODUCT_SELLING);
                 } else {
-                    product.setProductStatus(productRepo.PRODUCT_NOT_APPROVED);
+                    product.setProductStatus(ProductService.PRODUCT_NOT_APPROVED);
                 }
                 productRepo.save(product);
-                log.info("admin {} censor product {} pass as {}", admin.getUsername(), productId, pass);
+                log.info("admin '{}' censor product '{}' pass as '{}'", admin.getUsername(), productId, pass);
                 return true;
             } else {
-                log.warn("no such product {}", productId);
+                log.warn("no such product '{}'", productId);
                 return false;
             }
         }
@@ -157,7 +158,7 @@ public class AdminServiceImpl implements AdminService {
             bulletinMsg.setPublishTime(new Date());
             bulletinMsg.setUser(admin);
             bulletinMsgRepo.save(bulletinMsg);
-            log.info("admin {} publish bulletin: {}", admin.getUsername(), bulletinContent);
+            log.info("admin '{}' publish bulletin: '{}'", admin.getUsername(), bulletinContent);
             return true;
         }
     }

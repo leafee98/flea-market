@@ -1,5 +1,6 @@
 package service;
 
+import model.bean.UserDetail;
 import org.springframework.lang.Nullable;
 
 public interface UserService {
@@ -26,4 +27,10 @@ public interface UserService {
 
     // remove social information, specify social info by type and url;
     Boolean removeSocial(String token, Long socialId);
+
+    @Nullable
+    UserDetail getMyDetail(String token);
+
+    @Nullable
+    UserDetail getUserDetail(String username);
 }

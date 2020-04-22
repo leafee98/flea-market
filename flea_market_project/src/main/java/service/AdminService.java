@@ -17,7 +17,7 @@ public interface AdminService {
     @Nullable
     List<ProductSummary> getCensoringProducts(String token);
 
-    Boolean CensorProduct(String token, Long productId, Boolean pass);
+    Boolean censorProduct(String token, Long productId, Boolean pass);
 
     // Bulletin operate
 

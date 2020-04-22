@@ -30,15 +30,20 @@ public class SystemServiceImpl implements SystemService {
         List<TokenEntity> tokenList =  tokenRepo.findByTokenEquals(token);
         if (! tokenList.isEmpty()) {
             if (tokenList.get(0).getExpireTime().after(new Date())) {
-                log.info("token2User: get user {} from token {}", tokenList.get(0).getUser().getUsername(), token);
-
-                return tokenList.get(0).getUser();
+                UserEntity user = tokenList.get(0).getUser();
+                if (user.getBanUntil().after(new Date())) {
+                    log.warn("user '{}' has been banned until '{}'", user.getUsername(), user.getBanUntil());
+                    return null;
+                } else {
+                    log.info("token2User: get user '{}' from token '{}'", user.getUsername(), token);
+                    return tokenList.get(0).getUser();
+                }
             } else {
-                log.info("token2User: such token is expired: {}", token);
+                log.warn("token2User: such token is expired: '{}'", token);
                 return null;
             }
         } else {
-            log.warn("token2User: no such token: {}", token);
+            log.warn("token2User: no such token: '{}'", token);
             return null;
         }
     }
@@ -60,13 +65,13 @@ public class SystemServiceImpl implements SystemService {
 
             token = tokenRepo.save(token);
 
-            log.debug("authorized token: id={} username={} expire_time={} token={}",
+            log.debug("authorized token: id='{}' username='{}' expire_time='{}' token='{}'",
                     token.getTokenId(), token.getUser().getUsername(), token.getExpireTime(), token.getToken());
-            log.info("authorized token for user {}", user.get().getUsername());
+            log.info("authorized token for user '{}'", user.get().getUsername());
 
             return token.getToken();
         } else {
-            log.error("authorized token failed: userId not found: {}", userId);
+            log.error("authorized token failed: userId not found: '{}'", userId);
             return null;
         }
     }
@@ -78,17 +83,17 @@ public class SystemServiceImpl implements SystemService {
             TokenEntity tokenEntity = tokenList.get(0);
             tokenRepo.delete(tokenEntity);
 
-            log.debug("invoke token: tokenId={} token={} expireTime={}",
+            log.debug("invoke token: tokenId='{}' token='{}' expireTime='{}'",
                     tokenEntity.getTokenId(), tokenEntity.getToken(), tokenEntity.getExpireTime());
 
             return true;
         } else {
-            log.warn("invoke token failed: token not found: {}", token);
+            log.warn("invoke token failed: token not found: '{}'", token);
             return false;
         }
     }
 
-    // no log, log in calling method by yourself.
+    // used for be the object to be operated.
     @Nullable
     @Override
     public UserEntity findUserByUsername(String username) {

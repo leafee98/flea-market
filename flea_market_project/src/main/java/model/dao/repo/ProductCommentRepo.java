@@ -9,7 +9,6 @@ import java.util.List;
 
 @Repository
 public interface ProductCommentRepo extends JpaRepository<ProductCommentEntity, Long> {
-    List<ProductCommentEntity> findByProductEqualsAndReplyToIsNull(ProductEntity product);
+    List<ProductCommentEntity> findByProductEquals(ProductEntity product);
 
-    List<ProductCommentEntity> findByReplyToEquals(ProductCommentEntity replyTo);
 }

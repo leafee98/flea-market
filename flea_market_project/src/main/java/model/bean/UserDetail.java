@@ -24,15 +24,19 @@ public class UserDetail {
 
     Date JoinTime;
 
+    Boolean admin;
+
     private List<Social> socialList;
 
     public UserDetail(UserEntity userEntity) {
         BeanUtils.copyProperties(userEntity, this);
+
         List<SocialEntity> sle = userEntity.getSocialList();
-        List<Social> sl = new ArrayList<Social>(sle.size());
-        for (int i = 0; i < sle.size(); ++i) {
-            sl.set(i, new Social(sle.get(i)));
+        List<Social> sl = new ArrayList<>(sle.size());
+        for (SocialEntity socialEntity : sle) {
+            sl.add(new Social(socialEntity));
         }
         this.setSocialList(sl);
     }
+
 }

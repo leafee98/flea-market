@@ -14,6 +14,7 @@ import model.dao.repo.ProductRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import service.ProductService;
 import service.SystemService;
 
@@ -40,10 +41,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private Boolean productSwitchableToEdit(ProductEntity product) {
-        return product.getProductStatus().equals(productRepo.PRODUCT_SELLING) ||
-                product.getProductStatus().equals(productRepo.PRODUCT_CENSORING) ||
-                product.getProductStatus().equals(productRepo.PRODUCT_EDITING) ||
-                product.getProductStatus().equals(productRepo.PRODUCT_NOT_APPROVED);
+        return product.getProductStatus().equals(ProductService.PRODUCT_SELLING) ||
+                product.getProductStatus().equals(ProductService.PRODUCT_CENSORING) ||
+                product.getProductStatus().equals(ProductService.PRODUCT_EDITING) ||
+                product.getProductStatus().equals(ProductService.PRODUCT_NOT_APPROVED);
     }
 
     private List<Object> productEditable(@Nullable String token, Long productId) {
@@ -57,23 +58,23 @@ public class ProductServiceImpl implements ProductService {
         Optional<ProductEntity> productOpt = productRepo.findById(productId);
 
         if (productOpt.isPresent()) {
-            if (productOpt.get().getProductStatus().equals(productRepo.PRODUCT_EDITING)) {
-                if (productOpt.get().getSeller().equals(user)) {
-                    log.info("user {} can edit product {}", user.getUsername(), productId);
+            if (productOpt.get().getProductStatus().equals(ProductService.PRODUCT_EDITING)) {
+                if (productOpt.get().getSeller().getUserId().equals(user.getUserId())) {
+                    log.info("user '{}' can edit product '{}'", user.getUsername(), productId);
                     List<Object> list = new ArrayList<>();
                     list.add(user);
                     list.add(productOpt.get());
                     return list;
                 } else {
-                    log.warn("user {} is not the seller of product {}", user.getUsername(), productId);
+                    log.warn("user '{}' is not the seller of product '{}'", user.getUsername(), productId);
                     return null;
                 }
             } else {
-                log.warn("product {} is not in editing status", productId);
+                log.warn("product '{}' is not in editing status", productId);
                 return null;
             }
         } else {
-            log.warn("no such product: {}", productId);
+            log.warn("no such product: '{}'", productId);
             return null;
         }
     }
@@ -81,10 +82,10 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductSummary> getProductList() {
         List<ProductEntity> productEntityList =
-                productRepo.findByProductStatusEquals(productRepo.PRODUCT_SELLING, productRepo.sortByReleaseDesc);
+                productRepo.findByProductStatusEquals(ProductService.PRODUCT_SELLING, productRepo.sortByReleaseDesc);
         List<ProductSummary> productSummaryList = new ArrayList<>(productEntityList.size());
-        for (int i = 0; i < productEntityList.size(); ++i) {
-            productSummaryList.set(i, new ProductSummary(productEntityList.get(i)));
+        for (ProductEntity productEntity : productEntityList) {
+            productSummaryList.add(new ProductSummary(productEntity));
         }
         return productSummaryList;
     }
@@ -99,10 +100,10 @@ public class ProductServiceImpl implements ProductService {
         } else {
             List<ProductEntity> productEntityList = productRepo.findByBuyerEquals(user, productRepo.sortByReleaseDesc);
             List<ProductSummary> productSummaryList = new ArrayList<>(productEntityList.size());
-            for (int i = 0; i < productEntityList.size(); ++i) {
-                productSummaryList.set(i, new ProductSummary(productEntityList.get(i)));
+            for (ProductEntity productEntity : productEntityList) {
+                productSummaryList.add(new ProductSummary(productEntity));
             }
-            log.info("user {} get {} bought product summary", user.getUsername(), productSummaryList.size());
+            log.info("user '{}' get '{}' bought product summary", user.getUsername(), productSummaryList.size());
             return productSummaryList;
         }
     }
@@ -117,23 +118,24 @@ public class ProductServiceImpl implements ProductService {
         } else {
             List<ProductEntity> productEntityList = productRepo.findBySellerEquals(user, productRepo.sortByReleaseDesc);
             List<ProductSummary> productSummaryList = new ArrayList<>(productEntityList.size());
-            for (int i = 0; i < productEntityList.size(); ++i) {
-                productSummaryList.set(i, new ProductSummary(productEntityList.get(i)));
+            for (ProductEntity productEntity : productEntityList) {
+                productSummaryList.add(new ProductSummary(productEntity));
             }
-            log.info("user {} get {} sold product summary", user.getUsername(), productSummaryList.size());
+            log.info("user '{}' get '{}' sold product summary", user.getUsername(), productSummaryList.size());
             return productSummaryList;
         }
     }
 
     @Nullable
     @Override
+    @Transactional
     public ProductDetail getProductDetail(Long productId) {
         Optional<ProductEntity> productOpt = productRepo.findById(productId);
         if (productOpt.isPresent()) {
-            log.info("get product detail id={}", productId);
+            log.info("get product detail id='{}'", productId);
             return new ProductDetail(productOpt.get());
         } else {
-            log.warn("no such product id={}", productId);
+            log.warn("no such product id='{}'", productId);
             return null;
         }
     }
@@ -147,14 +149,14 @@ public class ProductServiceImpl implements ProductService {
             return null;
         } else {
             ProductEntity product = new ProductEntity();
-            product.setProductStatus(productRepo.PRODUCT_EDITING);
+            product.setProductStatus(ProductService.PRODUCT_EDITING);
             product.setSeller(user);
             product.setReleaseTime(new Date());
             product.setExpectedPrice(0.0);
             product.setProductName("new product");
             product.setProductDetail("product detail");
             product = productRepo.save(product);
-            log.info("user {} create a new product {}", user.getUsername(), product.getProductId());
+            log.info("user '{}' create a new product '{}'", user.getUsername(), product.getProductId());
             return product.getProductId();
         }
     }
@@ -169,22 +171,22 @@ public class ProductServiceImpl implements ProductService {
             Optional<ProductEntity> productOpt = productRepo.findById(productId);
             if (productOpt.isPresent()) {
                 ProductEntity product = productOpt.get();
-                if (product.getSeller().equals(user)) {
+                if (product.getSeller().getUserId().equals(user.getUserId())) {
                     if (productSwitchableToEdit(product)) {
                         productRepo.delete(product);
-                        log.info("user {} delete product {}", user.getUsername(), productId);
+                        log.info("user '{}' delete product '{}'", user.getUsername(), productId);
                         return true;
                     } else {
-                        log.warn("user {} want to delete product {} while it's {}",
+                        log.warn("user '{}' want to delete product '{}' while it's '{}'",
                                 user.getUsername(), productId, product.getProductStatus());
                         return false;
                     }
                 } else {
-                    log.warn("user {} is not the seller of product {}", user.getUsername(), productId);
+                    log.warn("user '{}' is not the seller of product '{}'", user.getUsername(), productId);
                     return false;
                 }
             } else {
-                log.warn("user {} want to delete not exist product {}", user.getUsername(), productId);
+                log.warn("user '{}' want to delete not exist product '{}'", user.getUsername(), productId);
                 return false;
             }
         }
@@ -200,23 +202,23 @@ public class ProductServiceImpl implements ProductService {
             Optional<ProductEntity> productOpt = productRepo.findById(productId);
             if (productOpt.isPresent()) {
                 ProductEntity product = productOpt.get();
-                if (product.getSeller().equals(user)) {
+                if (product.getSeller().getUserId().equals(user.getUserId())) {
                     if (productSwitchableToEdit(product)) {
-                        product.setProductStatus(productRepo.PRODUCT_EDITING);
+                        product.setProductStatus(ProductService.PRODUCT_EDITING);
                         productRepo.save(product);
-                        log.info("user {} edit product {}", user.getUsername(), productId);
+                        log.info("user '{}' edit product '{}'", user.getUsername(), productId);
                         return true;
                     } else {
-                        log.warn("user {} want to edit product {} while it's {}",
+                        log.warn("user '{}' want to edit product '{}' while it's '{}'",
                                 user.getUsername(), productId, product.getProductStatus());
                         return false;
                     }
                 } else {
-                    log.warn("user {} is not the seller of product {}", user.getUsername(), productId);
+                    log.warn("user '{}' is not the seller of product '{}'", user.getUsername(), productId);
                     return false;
                 }
             } else {
-                log.warn("user {} want to edit not exist product {}", user.getUsername(), productId);
+                log.warn("user '{}' want to edit not exist product '{}'", user.getUsername(), productId);
                 return false;
             }
         }
@@ -232,23 +234,23 @@ public class ProductServiceImpl implements ProductService {
             Optional<ProductEntity> productOpt = productRepo.findById(productId);
             if (productOpt.isPresent()) {
                 ProductEntity product = productOpt.get();
-                if (product.getSeller().equals(user)) {
-                    if (product.getProductStatus().equals(productRepo.PRODUCT_EDITING)) {
-                        product.setProductStatus(productRepo.PRODUCT_CENSORING);
+                if (product.getSeller().getUserId().equals(user.getUserId())) {
+                    if (product.getProductStatus().equals(ProductService.PRODUCT_EDITING)) {
+                        product.setProductStatus(ProductService.PRODUCT_CENSORING);
                         productRepo.save(product);
-                        log.info("user {} finish edit on product {}", user.getUsername(), productId);
+                        log.info("user '{}' finish edit on product '{}'", user.getUsername(), productId);
                         return true;
                     } else {
-                        log.warn("user {} want to finish edit product {} while it's {}",
+                        log.warn("user '{}' want to finish edit product '{}' while it's '{}'",
                                 user.getUsername(), productId, product.getProductStatus());
                         return false;
                     }
                 } else {
-                    log.warn("user {} is not the seller of product {}", user.getUsername(), productId);
+                    log.warn("user '{}' is not the seller of product '{}'", user.getUsername(), productId);
                     return false;
                 }
             } else {
-                log.warn("user {} want to finish edit on not exist product {}", user.getUsername(), productId);
+                log.warn("user '{}' want to finish edit on not exist product '{}'", user.getUsername(), productId);
                 return false;
             }
         }
@@ -266,7 +268,7 @@ public class ProductServiceImpl implements ProductService {
 
             product.setExpectedPrice(price);
             productRepo.save(product);
-            log.info("user {} edit expected price to {} on product {}", user.getUsername(), price, productId);
+            log.info("user '{}' edit expected price to '{}' on product '{}'", user.getUsername(), price, productId);
             return true;
         }
     }
@@ -283,7 +285,7 @@ public class ProductServiceImpl implements ProductService {
 
             product.setProductName(productName);
             productRepo.save(product);
-            log.info("user {} edit product name to {} on product {}", user.getUsername(), productName, productId);
+            log.info("user '{}' edit product name to '{}' on product '{}'", user.getUsername(), productName, productId);
             return true;
         }
     }
@@ -300,13 +302,15 @@ public class ProductServiceImpl implements ProductService {
 
             product.setProductDetail(productDetail);
             productRepo.save(product);
-            log.info("user {} edit product detail to {} on product {}", user.getUsername(), productDetail, productId);
+            log.info("user '{}' edit product detail to '{}' on product '{}'",
+                    user.getUsername(), productDetail, productId);
             return true;
         }
     }
 
     @Override
     @Nullable
+    @Transactional()
     public Long editAddPic(String token, Long productId, String picUrl) {
         List<Object> list = productEditable(token, productId);
         if (list == null) {
@@ -320,10 +324,10 @@ public class ProductServiceImpl implements ProductService {
             productPic.setProduct(product);
             productPic.setProductPicUrl(picUrl);
 
+            productPic = productPicRepo.save(productPic);
             product.getProductPicList().add(productPic);
             productRepo.save(product);
-            productPic = productPicRepo.save(productPic);
-            log.info("user {} add product picture {} on product {}", user.getUsername(), picUrl, productId);
+            log.info("user '{}' add product picture '{}' on product '{}'", user.getUsername(), picUrl, productId);
             return productPic.getProductPicId();
         }
     }
@@ -340,18 +344,18 @@ public class ProductServiceImpl implements ProductService {
 
             Optional<ProductPicEntity> productPicOpt = productPicRepo.findById(picId);
             if (productPicOpt.isPresent()) {
-                if (productPicOpt.get().getProduct().equals(product)) {
+                if (productPicOpt.get().getProduct().getProductId().equals(product.getProductId())) {
                     productPicRepo.delete(productPicOpt.get());
-                    log.info("user {} delete product picture {} on product {}",
+                    log.info("user '{}' delete product picture '{}' on product '{}'",
                             user.getUsername(), picId, productId);
                     return true;
                 } else {
-                    log.warn("user {} delete product picture {} not belong to product {}",
+                    log.warn("user '{}' delete product picture '{}' not belong to product '{}'",
                             user.getUsername(), picId, productId);
                     return false;
                 }
             } else {
-                log.warn("user {} delete not exist product picture {} on product {}",
+                log.warn("user '{}' delete not exist product picture '{}' on product '{}'",
                         user.getUsername(), picId, productId);
                 return false;
             }
@@ -363,7 +367,7 @@ public class ProductServiceImpl implements ProductService {
     //     Optional<ProductEntity> productEntityOpt = productRepo.findById(product.getProductId());
     //     UserEntity user = systemService.token2User(token);
     //     if (user == null) {
-    //         log.warn("invalid or expired token {}", token);
+    //         log.warn("invalid or expired token '{}'", token);
     //         return false;
     //     } else {
     //         if (productEntityOpt.isPresent()) {
@@ -383,14 +387,14 @@ public class ProductServiceImpl implements ProductService {
     //                 // productEntity.setProductPicList(productPicEntityList);
     //                 productRepo.save(productEntity);
 
-    //                 log.info("user {} modified product({})", user.getUsername(), productEntity.getProductId());
+    //                 log.info("user '{}' modified product('{}')", user.getUsername(), productEntity.getProductId());
     //                 return true;
     //             } else {
-    //                 log.warn("product({})'s seller is not {}", product.getProductId(), user.getUsername());
+    //                 log.warn("product('{}')'s seller is not '{}'", product.getProductId(), user.getUsername());
     //                 return false;
     //             }
     //         } else {
-    //             log.warn("product id had been changed or no such product whose id is {}", product.getProductId());
+    //             log.warn("product id had been changed or no such product whose id is '{}'", product.getProductId());
     //             return false;
     //         }
     //     }
@@ -401,19 +405,20 @@ public class ProductServiceImpl implements ProductService {
         UserEntity user = systemService.token2User(token);
         Optional<ProductEntity> productOpt = productRepo.findById(productId);
         if (user == null) {
-            log.warn("invalid or expired token {}", token);
+            log.warn("invalid or expired token '{}'", token);
             return false;
         } else {
             if (productOpt.isPresent()) {
                 ProductEntity product = productOpt.get();
-                if (product.getProductStatus().equals(productRepo.PRODUCT_SELLING)) {
+                if (product.getProductStatus().equals(ProductService.PRODUCT_SELLING)) {
                     product.setBuyer(user);
-                    product.setProductStatus(productRepo.PRODUCT_ORDERED);
+                    product.setProductStatus(ProductService.PRODUCT_ORDERED);
                     productRepo.save(product);
-                    log.info("user {} order product {}", user.getUsername(), productId);
+                    log.info("user '{}' order product '{}'", user.getUsername(), productId);
                     return true;
                 } else {
-                    log.warn("user {} want to order product {} which are not selling", user.getUsername(), productId);
+                    log.warn("user '{}' want to order product '{}' which are not selling",
+                            user.getUsername(), productId);
                     return false;
                 }
             } else {
@@ -428,25 +433,35 @@ public class ProductServiceImpl implements ProductService {
         UserEntity user = systemService.token2User(token);
         Optional<ProductEntity> productOpt = productRepo.findById(productId);
         if (user == null) {
-            log.warn("invalid or expired token {}", token);
+            log.warn("invalid or expired token '{}'", token);
             return false;
         } else {
             if (productOpt.isPresent()) {
                 ProductEntity product = productOpt.get();
-                if (product.getProductStatus().equals(productRepo.PRODUCT_ORDERED)) {
-                    if (product.getBuyer().equals(user)) {
-                        log.info("buyer {} canceled order on product {}", user.getUsername(), productId);
+                if (product.getProductStatus().equals(ProductService.PRODUCT_ORDERED)
+                        || product.getProductStatus().equals(ProductService.PRODUCT_CONFIRM_SELLER)
+                        || product.getProductStatus().equals(ProductService.PRODUCT_CONFIRM_BUYER)) {
+                    if (product.getBuyer().getUserId().equals(user.getUserId())) {
+                        product.setProductStatus(ProductService.PRODUCT_SELLING);
+                        product.setBuyer(null);
+                        productRepo.save(product);
+
+                        log.info("buyer '{}' canceled order on product '{}'", user.getUsername(), productId);
                         return true;
-                    }  else if (product.getSeller().equals(user)) {
-                        log.info("seller {} canceled order on product {}", user.getUsername(), productId);
+                    }  else if (product.getSeller().getUserId().equals(user.getUserId())) {
+                        product.setProductStatus(ProductService.PRODUCT_SELLING);
+                        product.setBuyer(null);
+                        productRepo.save(product);
+
+                        log.info("seller '{}' canceled order on product '{}'", user.getUsername(), productId);
                         return true;
                     } else {
-                        log.warn("user {} cancel order on product {} which not related to him(she)",
+                        log.warn("user '{}' cancel order on product '{}' which not related to him(she)",
                                 user.getUsername(), productId);
                         return false;
                     }
                 } else {
-                    log.warn("user {} cancel order on product {} which is not ordered",
+                    log.warn("user '{}' cancel order on product '{}' which is not ordered",
                             user.getUsername(), productId);
                     return false;
                 }
@@ -462,48 +477,50 @@ public class ProductServiceImpl implements ProductService {
         UserEntity user = systemService.token2User(token);
         Optional<ProductEntity> productOpt = productRepo.findById(productId);
         if (user == null) {
-            log.warn("invalid or expired token {}", token);
+            log.warn("invalid or expired token '{}'", token);
             return false;
         } else {
             if (productOpt.isPresent()) {
                 ProductEntity product = productOpt.get();
-                if (product.getProductStatus().equals(productRepo.PRODUCT_ORDERED)) {
-                    if (product.getSeller().equals(user)) {
-                        product.setProductStatus(productRepo.PRODUCT_CONFIRM_SELLER);
-                        productRepo.save(product);
-                        return true;
-                    } else if (product.getBuyer().equals(user)) {
-                        product.setProductStatus(productRepo.PRODUCT_CONFIRM_BUYER);
-                        productRepo.save(product);
-                        return true;
-                    } else {
-                        log.warn("user {} want to confirm product {} which has not relation to him(she)",
+                switch (product.getProductStatus()) {
+                    case ProductService.PRODUCT_ORDERED:
+                        if (product.getSeller().getUserId().equals(user.getUserId())) {
+                            product.setProductStatus(ProductService.PRODUCT_CONFIRM_SELLER);
+                            productRepo.save(product);
+                            return true;
+                        } else if (product.getBuyer().getUserId().equals(user.getUserId())) {
+                            product.setProductStatus(ProductService.PRODUCT_CONFIRM_BUYER);
+                            productRepo.save(product);
+                            return true;
+                        } else {
+                            log.warn("user '{}' want to confirm product '{}' which has not relation to him(she)",
+                                    user.getUsername(), productId);
+                            return false;
+                        }
+                    case ProductService.PRODUCT_CONFIRM_SELLER:
+                        if (product.getBuyer().getUserId().equals(user.getUserId())) {
+                            product.setProductStatus(ProductService.PRODUCT_CLINCH);
+                            productRepo.save(product);
+                            return true;
+                        } else {
+                            log.warn("user '{}' want to confirm product '{}' which has not relation to him(she)",
+                                    user.getUsername(), productId);
+                            return false;
+                        }
+                    case ProductService.PRODUCT_CONFIRM_BUYER:
+                        if (product.getSeller().getUserId().equals(user.getUserId())) {
+                            product.setProductStatus(ProductService.PRODUCT_CLINCH);
+                            productRepo.save(product);
+                            return true;
+                        } else {
+                            log.warn("user '{}' want to confirm product '{}' which has not relation to him(she)",
+                                    user.getUsername(), productId);
+                            return false;
+                        }
+                    default:
+                        log.warn("user '{}' want to confirm product '{}' which cannot be confirmed",
                                 user.getUsername(), productId);
                         return false;
-                    }
-                } else if (product.getProductStatus().equals(productRepo.PRODUCT_CONFIRM_SELLER)) {
-                    if (product.getBuyer().equals(user)) {
-                        product.setProductStatus(productRepo.PRODUCT_CLINCH);
-                        productRepo.save(product);
-                        return true;
-                    } else {
-                        log.warn("user {} want to confirm product {} which has not relation to him(she)",
-                                user.getUsername(), productId);
-                        return false;
-                    }
-                } else if (product.getProductStatus().equals(productRepo.PRODUCT_CONFIRM_BUYER)) {
-                    if (product.getSeller().equals(user)) {
-                        product.setProductStatus(productRepo.PRODUCT_CLINCH);
-                        productRepo.save(product);
-                        return true;
-                    } else {
-                        log.warn("user {} want to confirm product {} which has not relation to him(she)",
-                                user.getUsername(), productId);
-                        return false;
-                    }
-                } else {
-                    log.warn("user {} want to confirm product {} which cannot be confirmed", user.getUsername(), productId);
-                    return false;
                 }
             } else {
                 log.warn("invalid productId");
@@ -513,10 +530,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Boolean comment(String token, Long productId, String content, Long replyTo) {
+    public Boolean comment(String token, Long productId, String content) {
         UserEntity user = systemService.token2User(token);
         if (user == null) {
-            log.warn("invalid or expired token {}", token);
+            log.warn("invalid or expired token '{}'", token);
             return false;
         } else {
             Optional<ProductEntity> productOpt = productRepo.findById(productId);
@@ -527,27 +544,13 @@ public class ProductServiceImpl implements ProductService {
                 commentEntity.setProduct(product);
                 commentEntity.setContent(content);
                 commentEntity.setCommentTime(new Date());
-                if (replyTo != null) {
-                    Optional<ProductCommentEntity> commentOpt = productCommentRepo.findById(replyTo);
-                    if (commentOpt.isPresent()) {
-                        commentEntity.setReplyTo(commentOpt.get());
-                        productCommentRepo.save(commentEntity);
-                        log.info("user {} comment on product {} reply to comment {}: {}",
-                                user.getUsername(), productId, replyTo, content);
-                        return true;
-                    } else {
-                        log.warn("user {} comment on product {} reply to no exist comment {}",
-                                user.getUsername(), productId, replyTo);
-                        return false;
-                    }
-                } else {
-                    productCommentRepo.save(commentEntity);
-                    log.info("user {} comment on product {}: {}",
-                            user.getUsername(), productId, content);
-                    return true;
-                }
+                productCommentRepo.save(commentEntity);
+
+                log.info("user '{}' comment on product '{}': '{}'",
+                        user.getUsername(), productId, content);
+                return true;
             } else {
-                log.warn("user {} comment on not exist product {}", user.getUsername(), productId);
+                log.warn("user '{}' comment on not exist product '{}'", user.getUsername(), productId);
                 return false;
             }
         }
@@ -555,37 +558,19 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Nullable
-    public List<ProductComment> getCommentsNoReply(Long productId) {
+    public List<ProductComment> getComments(Long productId) {
         Optional<ProductEntity> productOpt = productRepo.findById(productId);
         if (productOpt.isPresent()) {
             List<ProductCommentEntity> commentEntityList =
-                    productCommentRepo.findByProductEqualsAndReplyToIsNull(productOpt.get());
+                    productCommentRepo.findByProductEquals(productOpt.get());
             List<ProductComment> commentList = new ArrayList<>(commentEntityList.size());
-            for (int i = 0; i < commentEntityList.size(); ++i) {
-                commentList.set(i, new ProductComment(commentEntityList.get(i)));
+            for (ProductCommentEntity productCommentEntity : commentEntityList) {
+                commentList.add(new ProductComment(productCommentEntity));
             }
-            log.info("somebody get {} comment(s) on product {}", commentList.size(), productId);
+            log.info("somebody get '{}' comment(s) on product '{}'", commentList.size(), productId);
             return commentList;
         } else {
-            log.warn("somebody get product comment on not exist product {}", productId);
-            return null;
-        }
-    }
-
-    @Override
-    @Nullable
-    public List<ProductComment> getCommentsReplayTo(Long commentId) {
-        Optional<ProductCommentEntity> commentOpt = productCommentRepo.findById(commentId);
-        if (commentOpt.isPresent()) {
-            List<ProductCommentEntity> commentEntityList = productCommentRepo.findByReplyToEquals(commentOpt.get());
-            List<ProductComment> commentList = new ArrayList<>(commentEntityList.size());
-            for (int i = 0; i < commentEntityList.size(); ++i) {
-                commentList.set(i, new ProductComment(commentEntityList.get(i)));
-            }
-            log.info("somebody get {} comment reply to comment {}", commentList.size(), commentId);
-            return commentList;
-        } else {
-            log.warn("somebody get product comment reply to not exist comment {}", commentId);
+            log.warn("somebody get product comment on not exist product '{}'", productId);
             return null;
         }
     }

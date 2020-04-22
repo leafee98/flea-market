@@ -9,6 +9,15 @@ import java.util.List;
 
 public interface ProductService {
 
+    String PRODUCT_CENSORING = "censoring";
+    String PRODUCT_EDITING = "editing";
+    String PRODUCT_NOT_APPROVED = "not_approved";
+    String PRODUCT_SELLING = "selling";
+    String PRODUCT_ORDERED = "ordered";
+    String PRODUCT_CONFIRM_BUYER = "confirm_buyer";
+    String PRODUCT_CONFIRM_SELLER = "confirm_seller";
+    String PRODUCT_CLINCH = "clinch";
+
     // sort by time, from new to old, only selling product
     List<ProductSummary> getProductList();
 
@@ -21,8 +30,6 @@ public interface ProductService {
 
     @Nullable
     ProductDetail getProductDetail(Long productId);
-
-    // Boolean releaseProduct(String token, ProductDetail product);
 
     // create product, status is editing. return productId
     @Nullable
@@ -61,12 +68,8 @@ public interface ProductService {
     Boolean confirmOrder(String token , Long productId);
 
 
-    Boolean comment(String token, Long productId, String content,
-                    @Nullable Long replyTo);
+    Boolean comment(String token, Long productId, String content);
 
     @Nullable
-    List<ProductComment> getCommentsNoReply(Long productId);
-
-    @Nullable
-    List<ProductComment> getCommentsReplayTo(Long commentId);
+    List<ProductComment> getComments(Long productId);
 }

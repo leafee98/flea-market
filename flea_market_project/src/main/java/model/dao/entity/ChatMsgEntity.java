@@ -16,7 +16,7 @@ public class ChatMsgEntity {
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "c_chat_id", nullable = false)
-    ChatEntity chat;
+    ChatSessionEntity chatSession;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "c_sender_id", nullable = false)

@@ -10,6 +10,7 @@ public interface ChatService {
 
     // create chat session if not exist.
     // or get the exist session
+    @Nullable
     Long startChatSession(String token, String username);
 
     @Nullable

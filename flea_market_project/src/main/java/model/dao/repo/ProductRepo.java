@@ -11,15 +11,6 @@ import java.util.List;
 @Repository
 public interface ProductRepo extends JpaRepository<ProductEntity, Long> {
 
-    String PRODUCT_CENSORING = "censoring";
-    String PRODUCT_EDITING = "editing";
-    String PRODUCT_NOT_APPROVED = "not_approved";
-    String PRODUCT_SELLING = "selling";
-    String PRODUCT_ORDERED = "ordered";
-    String PRODUCT_CONFIRM_BUYER = "confirm_buyer";
-    String PRODUCT_CONFIRM_SELLER = "confirm_seller";
-    String PRODUCT_CLINCH = "clinch";
-
     Sort sortByReleaseDesc = Sort.by(Sort.Direction.DESC, "releaseTime");
 
     List<ProductEntity> findByProductStatusEquals(String status, Sort sort);

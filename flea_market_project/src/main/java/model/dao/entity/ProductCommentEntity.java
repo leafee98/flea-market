@@ -10,12 +10,9 @@ import java.util.Date;
 @Table(name = "t_comment")
 public class ProductCommentEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "c_comment_id")
     Long commentId;
-
-    @ManyToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "c_reply_to", nullable = true)
-    ProductCommentEntity replyTo;
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "c_product_id", nullable = false)

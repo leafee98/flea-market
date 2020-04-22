@@ -13,8 +13,6 @@ public class ProductComment {
 
     private Long commentId;
 
-    private Long replyTo;
-
     private String content;
 
     private Date commentTime;

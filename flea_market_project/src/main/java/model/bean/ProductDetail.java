@@ -39,8 +39,14 @@ public class ProductDetail {
 
         List<ProductPicEntity> productPicList = productEntity.getProductPicList();
         this.pics = new ArrayList<>(productPicList.size());
-        for (int i = 0; i < productPicList.size(); ++i) {
-            this.pics.set(i, new ProductPic(productPicList.get(i)));
+        for (ProductPicEntity productPicEntity : productPicList) {
+            this.pics.add(new ProductPic(productPicEntity));
+        }
+
+        this.seller = new UserDetail(productEntity.getSeller());
+
+        if (productEntity.getBuyer() != null) {
+            this.buyer = new UserDetail(productEntity.getBuyer());
         }
     }
 }

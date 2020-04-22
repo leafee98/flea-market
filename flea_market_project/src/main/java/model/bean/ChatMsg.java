@@ -2,9 +2,7 @@ package model.bean;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import model.dao.entity.ChatEntity;
 import model.dao.entity.ChatMsgEntity;
-import org.springframework.beans.BeanUtils;
 
 import java.util.Date;
 
@@ -16,11 +14,17 @@ public class ChatMsg {
 
     private Long chatSessionId;
 
-    private Date chatMsgTime;
+    private Date messageTime;
+
+    private String content;
+
+    private UserSummary sender;
 
     public ChatMsg(ChatMsgEntity chatMsg) {
         this.chatMsgId = chatMsg.getChatMsgId();
-        this.chatSessionId = chatMsg.getChat().getChatId();
-        this.chatMsgTime = chatMsg.getMessageTime();
+        this.chatSessionId = chatMsg.getChatSession().getChatSessionId();
+        this.messageTime = chatMsg.getMessageTime();
+        this.sender = new UserSummary(chatMsg.getSender());
+        this.content = chatMsg.getContent();
     }
 }

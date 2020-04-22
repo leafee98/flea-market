@@ -57,7 +57,7 @@ public class UserEntity {
     @JoinTable(name = "t_relation_user_chat",
     joinColumns = @JoinColumn(name = "c_user_id"),
     inverseJoinColumns = @JoinColumn(name = "c_chat_id"))
-    Set<ChatEntity> chatList;
+    Set<ChatSessionEntity> chatSessionList;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     List<TokenEntity> tokenList;
