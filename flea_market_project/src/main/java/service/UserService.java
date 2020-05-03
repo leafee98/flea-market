@@ -25,7 +25,6 @@ public interface UserService {
     @Nullable
     Long addSocial(String token, String socialType, String socialUrl);
 
-    // remove social information, specify social info by type and url;
     Boolean removeSocial(String token, Long socialId);
 
     @Nullable

@@ -28,7 +28,7 @@ public class UserEntity {
     @Column(name = "c_user_id")
     Long userId;
 
-    @Column(name = "c_username", length = 32, nullable = false)
+    @Column(name = "c_username", length = 32, nullable = false, unique = true)
     String username;
 
     @Column(name = "c_nickname", length = 64, nullable = false)
