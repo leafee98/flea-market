@@ -5,7 +5,6 @@ import model.bean.UserDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import service.UserService;
 import webController.Utils;
@@ -27,9 +26,7 @@ public class User {
     }
 
     @RequestMapping(value = "/api/user/authorize", method = RequestMethod.POST, produces = {"application/json"})
-    String authorize(@RequestParam(name = "username") String username,
-                     @RequestParam(name = "password") String password
-    ) {
+    String authorize(String username, String password) {
         String token = userService.authorize(username, password);
         return Utils.format(token != null, token);
     }
