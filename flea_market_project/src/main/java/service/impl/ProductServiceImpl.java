@@ -151,7 +151,7 @@ public class ProductServiceImpl implements ProductService {
             ProductEntity product = new ProductEntity();
             product.setProductStatus(ProductService.PRODUCT_EDITING);
             product.setSeller(user);
-            product.setReleaseTime(new Date());
+            product.setPublishTime(new Date());
             product.setExpectedPrice(0.0);
             product.setProductName("new product");
             product.setProductDetail("product detail");

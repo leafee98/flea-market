@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface ProductRepo extends JpaRepository<ProductEntity, Long> {
 
-    Sort sortByReleaseDesc = Sort.by(Sort.Direction.DESC, "releaseTime");
+    Sort sortByReleaseDesc = Sort.by(Sort.Direction.DESC, "publishTime");
 
     List<ProductEntity> findByProductStatusEquals(String status, Sort sort);
 

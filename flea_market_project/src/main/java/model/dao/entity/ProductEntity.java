@@ -31,7 +31,7 @@ public class ProductEntity {
     Double expectedPrice;
 
     @Column(name = "c_publish_time", nullable = false)
-    Date releaseTime;
+    Date publishTime;
 
     @Column(name = "c_product_name", nullable = false)
     String productName;
