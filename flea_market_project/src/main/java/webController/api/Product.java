@@ -67,7 +67,7 @@ public class Product {
     @RequestMapping(path = "/api/product/deleteProduct", method = RequestMethod.POST, produces = {"application/json"})
     String deleteProduct(String token, Long productId) {
         Boolean res = productService.deleteProduct(token, productId);
-        return Utils.format(res != null, null);
+        return Utils.format(res, null);
     }
 
     // // switch product status to editing from selling,censoring,not_approved
@@ -75,7 +75,7 @@ public class Product {
     @RequestMapping(path = "/api/product/editProduct", method = RequestMethod.POST, produces = {"application/json"})
     String editProduct(String token, Long productId) {
         Boolean res = productService.editProduct(token, productId);
-        return Utils.format(res != null, null);
+        return Utils.format(res, null);
     }
 
     // // switch product status to censoring
@@ -83,28 +83,28 @@ public class Product {
     @RequestMapping(path = "/api/product/editFinish", method = RequestMethod.POST, produces = {"application/json"})
     String editFinish(String token, Long productId) {
         Boolean res = productService.editFinish(token, productId);
-        return Utils.format(res != null, null);
+        return Utils.format(res, null);
     }
 
     // Boolean editExpectedPrice(String token, Long productId, Double price);
     @RequestMapping(path = "/api/product/editExpectedPrice", method = RequestMethod.POST, produces = {"application/json"})
     String editExpectedPrice(String token, Long productId, Double price) {
         Boolean res = productService.editExpectedPrice(token, productId, price);
-        return Utils.format(res != null, null);
+        return Utils.format(res, null);
     }
 
     // Boolean editProductName(String token, Long productId, String productName);
     @RequestMapping(path = "/api/product/editProductName", method = RequestMethod.POST, produces = {"application/json"})
     String editProductName(String token, Long productId, String productName) {
         Boolean res = productService.editProductName(token, productId, productName);
-        return Utils.format(res != null, null);
+        return Utils.format(res, null);
     }
 
     // Boolean editProductDetail(String token, Long productId, String productDetail);
     @RequestMapping(path = "/api/product/editProductDetail", method = RequestMethod.POST, produces = {"application/json"})
     String editProductDetail(String token, Long productId, String productDetail) {
         Boolean res = productService.editProductDetail(token, productId, productDetail);
-        return Utils.format(res != null, null);
+        return Utils.format(res, null);
     }
 
     // // add picture to product, return picture id
@@ -121,21 +121,21 @@ public class Product {
     @RequestMapping(path = "/api/product/editDeletePic", method = RequestMethod.POST, produces = {"application/json"})
     String editDeletePic(String token, Long productId, Long picId) {
         Boolean res = productService.editDeletePic(token, productId, picId);
-        return Utils.format(res != null, null);
+        return Utils.format(res, null);
     }
 
     // Boolean orderProduct(String token, Long productId);
     @RequestMapping(path = "/api/product/orderProduct", method = RequestMethod.POST, produces = {"application/json"})
     String orderProduct(String token, Long productId) {
         Boolean res = productService.orderProduct(token, productId);
-        return Utils.format(res != null, null);
+        return Utils.format(res, null);
     }
 
     // Boolean cancelOrder(String token, Long productId);
     @RequestMapping(path = "/api/product/cancelOrder", method = RequestMethod.POST, produces = {"application/json"})
     String cancelOrder(String token, Long productId) {
         Boolean res = productService.cancelOrder(token, productId);
-        return Utils.format(res != null, null);
+        return Utils.format(res, null);
     }
 
     // // verify owner and buyer in method
@@ -143,7 +143,7 @@ public class Product {
     @RequestMapping(path = "/api/product/confirmOrder", method = RequestMethod.POST, produces = {"application/json"})
     String confirmOrder(String token , Long productId) {
         Boolean res = productService.confirmOrder(token, productId);
-        return Utils.format(res != null, null);
+        return Utils.format(res, null);
     }
 
 
@@ -152,7 +152,7 @@ public class Product {
     @RequestMapping(path = "/api/product/comment", method = RequestMethod.POST, produces = {"application/json"})
     String comment(String token, Long productId, String content) {
         Boolean res = productService.comment(token, productId, content);
-        return Utils.format(res != null, null);
+        return Utils.format(res, null);
     }
 
     // @Nullable
